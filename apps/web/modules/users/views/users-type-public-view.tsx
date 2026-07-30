@@ -37,6 +37,13 @@ function Type({ slug, user, isEmbed, booking, isBrandingHidden, eventData, orgBa
           hideBranding={isBrandingHidden}
           eventData={eventData}
           entity={{ ...eventData.entity, eventTypeId: eventData?.id }}
+          // Without this the booker never requests availability on a team page.
+          // BookerWebWrapper resolves `props.isTeamEvent ?? !!event.data?.team`,
+          // but getPublicEvent reports team context under `entity`, never as a
+          // `team` key, so the fallback is always false and the schedule query
+          // is built for a user named after the team slug. entity.teamSlug is
+          // null on personal events, so this stays correct for both routes.
+          isTeamEvent={!!eventData.entity?.teamSlug}
           durationConfig={eventData.metadata?.multipleDuration}
           orgBannerUrl={orgBannerUrl}
           /* TODO: Currently unused, evaluate it is needed-
