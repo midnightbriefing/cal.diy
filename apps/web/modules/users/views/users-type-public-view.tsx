@@ -44,6 +44,15 @@ function Type({ slug, user, isEmbed, booking, isBrandingHidden, eventData, orgBa
           // is built for a user named after the team slug. entity.teamSlug is
           // null on personal events, so this stays correct for both routes.
           isTeamEvent={!!eventData.entity?.teamSlug}
+          // This deploy runs only apps/web. apps/api/v2 is a separate
+          // application that is not deployed, so /api/v2/* is a hard 404 here.
+          // Once isTeamEvent is true the booker prefers the v2 slots endpoint
+          // (useApiV2 && isTeamEvent in useSchedule), which silently replaced a
+          // working tRPC call with a request to an API that does not exist, and
+          // the calendar sat on skeletons. Pinning it false keeps every booking
+          // page on the tRPC procedure, which is verified to return correct
+          // availability for these team events.
+          useApiV2={false}
           durationConfig={eventData.metadata?.multipleDuration}
           orgBannerUrl={orgBannerUrl}
           /* TODO: Currently unused, evaluate it is needed-
