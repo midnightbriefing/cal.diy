@@ -31,8 +31,6 @@ export const seoConfig: {
   },
   defaultNextSeo: {
     twitter: {
-      handle: "@vektortms",
-      site: "@vektortms",
       cardType: "summary_large_image",
     },
   },
