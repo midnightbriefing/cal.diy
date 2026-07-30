@@ -41,6 +41,10 @@ async function main(): Promise<void> {
 }
 
 main().catch((e) => {
-  console.error(e.stdout || e.stderr || e.message);
+  // Print every stream: stdout being non-empty used to short-circuit the
+  // stderr branch, which hid the real migration error entirely.
+  if (e.stdout) console.error(e.stdout);
+  if (e.stderr) console.error(e.stderr);
+  if (e.message) console.error(e.message);
   process.exit(1);
 });
