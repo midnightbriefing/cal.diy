@@ -91,7 +91,20 @@ export const useSchedule = ({
     // Prioritize slug over id, since slug is the first value we get available.
     // If we have a slug, we don't need to fetch the id.
     // TODO: are queries using eventTypeId faster? Even tho we lost time fetching the id with the slug.
-    ...(eventSlug ? { eventTypeSlug: eventSlug } : { eventTypeId: eventId ?? 0 }),
+    // Team events must be resolved by id, not slug. Looking a team event up by
+    // (team slug + event slug) does not resolve the specific event: every slug
+    // on the team comes back with identical availability, so per-event hosts and
+    // any per-host schedule override are lost. Measured against this instance:
+    // carrier-demo-quick, carrier-demo and carrier-demo-deep all returned the
+    // same 6 days by slug, while by id carrier-demo-deep correctly returned 10
+    // including the weekend days only its second host works. The booker already
+    // has the id (entity.eventTypeId), so prefer it whenever this is a team
+    // event and fall back to the original slug-first behaviour otherwise.
+    ...(isTeamEvent && eventId
+      ? { eventTypeId: eventId }
+      : eventSlug
+      ? { eventTypeSlug: eventSlug }
+      : { eventTypeId: eventId ?? 0 }),
     // @TODO: Old code fetched 2 days ago if we were fetching the current month.
     // Do we want / need to keep that behavior?
     startTime,
