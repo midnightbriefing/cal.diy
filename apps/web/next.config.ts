@@ -510,6 +510,23 @@ const nextConfig = (phase: string): NextConfig => {
           destination: "/apps/routing-forms/forms",
           permanent: false,
         },
+        // A bare team URL 404s on this deploy: the team landing page that would
+        // list the team's event types lives in the routes this fork does not
+        // ship, while /team/:slug/:type (the actual booking page) does. Anyone
+        // who trims a booking link back to its team, or guesses the team URL,
+        // hits a dead end.
+        //
+        // Send them to the marketing site's chooser rather than restoring Cal's
+        // list page. /meeting asks who the visitor is and routes them to the
+        // right event and duration, in our own design language; Cal's version
+        // would be a second, unbranded chooser competing with it. One front
+        // door. Kept temporary (307) because that is a product decision, and a
+        // 308 would be cached in browsers long after we changed our minds.
+        {
+          source: "/team/:slug",
+          destination: `${process.env.NEXT_PUBLIC_MARKETING_SITE_URL || "https://vektortms.com"}/meeting`,
+          permanent: false,
+        },
         {
           source: "/api/app-store/:path*",
           destination: "/app-store/:path*",
